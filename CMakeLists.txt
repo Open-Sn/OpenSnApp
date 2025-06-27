@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(MyOpenSnApp LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(OpenSn_INSTALL_PREFIX "/home/grads/q/quincy.huhn98/opensn/install")
-set(OPENSN_SOURCE_DIR "/home/grads/q/quincy.huhn98/opensn")
-
 find_package(MPI REQUIRED)
 find_package(VTK REQUIRED COMPONENTS
     CommonCore
@@ -60,13 +56,11 @@ set_target_properties(diffapp PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/python
 )
 
-
-
 # Optional executable
 add_executable(diff_app_exec src/main.cc src/diff_py_app.cc src/diffusion.cc ${DIFFUSION_SRCS})
 target_include_directories(diff_app_exec PRIVATE
     ${PROJECT_SOURCE_DIR}/diffusion
-    ${OPENSN_SOURCE_DIR}/external
+    ${PROJECT_SOURCE_DIR}/external
     ${PYBIND11_INCLUDE_DIRS}
     ${OpenSn_INSTALL_PREFIX}/include/opensn 
 )
