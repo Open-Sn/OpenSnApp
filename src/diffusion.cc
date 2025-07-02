@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "py_wrappers.h"
-#include "opensn/python/lib/functor.h" // temporary, see the included header for more details!
 #include "opensn/framework/physics/solver.h"
 #include "opensn/framework/field_functions/field_function_grid_based.h"
 #include "diffusion/cfem_diffusion_solver.h"
 #include "diffusion/dfem_diffusion_solver.h"
 #include "diffusion/diffusion_solver.h"
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 #include <memory>
 
 namespace opensn
@@ -45,7 +45,7 @@ WrapDiffusion(py::module& diffusion)
   );
   diff_base.def(
     "SetDCoefFunction",
-    [](DiffusionSolverBase& self, std::shared_ptr<PySSMFunction> p_func)
+    [](DiffusionSolverBase& self, const ScalarSpatialMaterialFunction& p_func)
     {
       self.SetDCoefFunction(p_func);
     },
@@ -54,14 +54,14 @@ WrapDiffusion(py::module& diffusion)
 
     Parameters
     ----------
-    func: pyopensn.math.ScalarSpatialMaterialFunction
+    func: Callable[[int, pyopensn.math.Vector3], float]
         ???
     )",
     py::arg("func")
   );
   diff_base.def(
     "SetQExtFunction",
-    [](DiffusionSolverBase& self, std::shared_ptr<PySSMFunction> p_func)
+    [](DiffusionSolverBase& self, const ScalarSpatialMaterialFunction& p_func)
     {
       self.SetQExtFunction(p_func);
     },
@@ -70,14 +70,14 @@ WrapDiffusion(py::module& diffusion)
 
     Parameters
     ----------
-    func: pyopensn.math.ScalarSpatialMaterialFunction
+    func: Callable[[int, pyopensn.math.Vector3], float]
         ???
     )",
     py::arg("func")
   );
   diff_base.def(
     "SetSigmaAFunction",
-    [](DiffusionSolverBase& self, std::shared_ptr<PySSMFunction> p_func)
+    [](DiffusionSolverBase& self, const ScalarSpatialMaterialFunction& p_func)
     {
       self.SetSigmaAFunction(p_func);
     },
@@ -86,7 +86,7 @@ WrapDiffusion(py::module& diffusion)
 
     Parameters
     ----------
-    func: pyopensn.math.ScalarSpatialMaterialFunction
+    func: Callable[[int, pyopensn.math.Vector3], float]
         ???
     )",
     py::arg("func")
@@ -181,9 +181,9 @@ WrapDiffusion(py::module& diffusion)
 
 // Wrap the diffusion components of OpenSn
 void
-py_diffusion(py::module& pydiff)
+py_diffusion(py::module& pyopensn)
 {
-  py::module diffusion = pydiff.def_submodule("diffusion", "Diffusion function module.");
+  py::module diffusion = pyopensn.def_submodule("diffusion", "Diffusion function module.");
   WrapDiffusion(diffusion);
 }
 

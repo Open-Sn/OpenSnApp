@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 The OpenSn Authors <https://open-sn.github.io/opensn/>
+// SPDX-License-Identifier: MIT
+
 #include "diff_py_app.h"
 #include "py_wrappers.h"
 #include "opensn/python/lib/console.h"
@@ -61,7 +64,6 @@ DiffApp::DiffApp(const mpi::Communicator& comm) : allow_petsc_error_handler_(fal
   opensnpy::console.BindModule(WrapSteadyState);
   opensnpy::console.BindModule(WrapNLKEigen);
   opensnpy::console.BindModule(WrapPIteration);
-  opensnpy::console.BindModule(WrapPRK);
 
   opensnpy::console.BindModule(WrapDiffusion);
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(MyOpenSnApp LANGUAGES C CXX)
+project(OpenSnApp LANGUAGES C CXX)
 
 find_package(MPI REQUIRED)
 find_package(VTK REQUIRED COMPONENTS
@@ -16,7 +16,6 @@ find_package(VTK REQUIRED COMPONENTS
 )
 find_package(OpenSn REQUIRED)
 
-# Optional: find pybind11
 find_package(pybind11 REQUIRED)
 
 find_package(caliper REQUIRED)
