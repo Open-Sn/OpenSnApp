@@ -13,6 +13,12 @@
 namespace opensn
 {
 
+
+/** Returns the input-parameter schema for SteadyStateROMSolver.
+ *
+ * Extends the steady-state source solver schema with:
+ * - `rom_problem` : an existing ROMProblem instance that manages ROM workflow.
+ */
 InputParameters
 SteadyStateROMSolver::GetInputParameters()
 {
@@ -38,6 +44,14 @@ SteadyStateROMSolver::Initialize()
 {
 }
 
+/** Executes the requested ROM workflow phase for the steady-state solver.
+ *
+ * Supported phases are:
+ * - OFFLINE : solves the full-order system and writes snapshots,
+ * - MERGE   : builds the reduced bases from stored snapshots,
+ * - SYSTEMS : assembles and writes reduced operators,
+ * - ONLINE  : interpolates and solves the reduced system.
+ */
 void
 SteadyStateROMSolver::Execute()
 {
@@ -70,6 +84,8 @@ SteadyStateROMSolver::Execute()
   }
   if (rom_options.phase == Phase::SYSTEMS)
   {
+    rom_problem_->LoadUgs();
+
     std::shared_ptr<CAROM::Matrix> AU_ = rom_problem_->AssembleAU();
     std::shared_ptr<CAROM::Vector> b_ = rom_problem_->AssembleRHS();
     const std::string& Ar_filename = "data/rom_system_Ar_" + std::to_string(rom_options.param_id);
@@ -79,10 +95,12 @@ SteadyStateROMSolver::Execute()
   if (rom_options.phase == Phase::ONLINE)
   {
     rom_problem_->ReadParamMatrix(rom_options.param_file);
+    rom_problem_->LoadUgs();
 
     std::shared_ptr<CAROM::Matrix> Ar_interp;
     std::shared_ptr<CAROM::Vector> rhs_interp;
-    rom_problem_->SetupInterpolator(*rom_options.new_point);
+    rom_problem_->SetupArInterpolator(*rom_options.new_point);
+    rom_problem_->SetupRHSrInterpolator(*rom_options.new_point);
 
     auto start = std::chrono::high_resolution_clock::now();
 

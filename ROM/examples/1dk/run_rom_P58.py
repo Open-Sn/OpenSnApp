@@ -1,4 +1,4 @@
-# run_rom_checkerboard.py
+# run_rom_P58.py
 from pathlib import Path
 import argparse
 import os, sys
@@ -8,8 +8,8 @@ if python_root:
     sys.path.insert(0, python_root)
 
 from job_manager import JobManager
-from checkerboard_problem import CheckerboardProblem
-from rom_driver import run_pipeline_1g
+from P58_problem import P58Problem
+from rom_driver import run_pipeline
 
 def main():
     ap = argparse.ArgumentParser()
@@ -35,9 +35,9 @@ def main():
         opensn_exe=args.exe,
     )
 
-    problem = CheckerboardProblem(repo_root)
+    problem = P58Problem(repo_root, ntrain=50)
 
-    run_pipeline_1g(problem, repo_root, jm)
+    run_pipeline(problem, repo_root, jm)
     problem.plot_results()
 
 
