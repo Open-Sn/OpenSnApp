@@ -11,11 +11,6 @@
 namespace opensn
 {
 
-/** Returns the input-parameter schema for PowerIterationKEigenROMSolver.
- *
- * Extends the base power-iteration k-eigen solver schema with:
- * - `rom_problem` : an existing ROMProblem instance that manages ROM workflow.
- */
 InputParameters
 PowerIterationKEigenROMSolver::GetInputParameters()
 {
@@ -27,15 +22,14 @@ PowerIterationKEigenROMSolver::GetInputParameters()
     "full-order power-iteration k-eigen solver and takes sample with libROM.");
   params.ChangeExistingParamToOptional("name", "PowerIterationKEigenROMSolver");
 
-  params.AddRequiredParameter<std::shared_ptr<Problem>>(
-    "rom_problem", "A ROM problem");
+  params.AddRequiredParameter<std::shared_ptr<Problem>>("rom_problem", "A ROM problem");
 
   return params;
 }
 
 PowerIterationKEigenROMSolver::PowerIterationKEigenROMSolver(const InputParameters& params)
   : PowerIterationKEigenSolver(params),
-    lbs_problem_(params.GetSharedPtrParam<Problem, DiscreteOrdinatesProblem>("problem")), 
+    lbs_problem_(params.GetSharedPtrParam<Problem, DiscreteOrdinatesProblem>("problem")),
     rom_problem_(params.GetSharedPtrParam<Problem, ROMProblem>("rom_problem"))
 {
 }
@@ -46,15 +40,6 @@ PowerIterationKEigenROMSolver::Initialize()
   PowerIterationKEigenSolver::Initialize();
 }
 
-/** Executes the requested ROM workflow phase for the k-eigenvalue solver.
- *
- * Supported phases are:
- * - OFFLINE : runs the full-order power iteration and writes snapshots,
- * - MERGE   : builds the reduced bases from stored snapshots,
- * - SYSTEMS : assembles and writes reduced operators,
- * - MIPOD   : sweeps to assemble and then solve the reduced system,
- * - ONLINE  : interpolates and solves the reduced k-eigenvalue system.
- */
 void
 PowerIterationKEigenROMSolver::Execute()
 {
@@ -73,7 +58,8 @@ PowerIterationKEigenROMSolver::Execute()
 
     if (opensn::mpi_comm.rank() == 0)
     {
-      std::ofstream outfile("results/offline_time_" + std::to_string(rom_options.param_id) + ".txt");
+      std::ofstream outfile("results/offline_time_" + std::to_string(rom_options.param_id) +
+                            ".txt");
       if (outfile.is_open())
       {
         outfile << elapsed.count() << std::endl;
@@ -81,7 +67,7 @@ PowerIterationKEigenROMSolver::Execute()
       }
     }
     if (rom_options.take_sample)
-        rom_problem_->TakeSample(rom_options.param_id);
+      rom_problem_->TakeSample(rom_options.param_id);
   }
   if (rom_options.phase == Phase::MERGE)
   {
@@ -93,10 +79,8 @@ PowerIterationKEigenROMSolver::Execute()
     rom_problem_->LoadUgs();
     std::shared_ptr<CAROM::Matrix> BU = rom_problem_->AssembleBU();
 
-    const std::string Ar_filename  =
-      "data/rom_system_Ar_" + std::to_string(rom_options.param_id);
-    const std::string Br_filename =
-      "data/rom_system_Br_" + std::to_string(rom_options.param_id);
+    const std::string Ar_filename = "data/rom_system_Ar_" + std::to_string(rom_options.param_id);
+    const std::string Br_filename = "data/rom_system_Br_" + std::to_string(rom_options.param_id);
 
     rom_problem_->AssembleROM(AU, BU, Ar_filename, Br_filename);
   }
@@ -128,7 +112,6 @@ PowerIterationKEigenROMSolver::Execute()
     log.Log() << "\n\n";
 
     log.Log() << "LinearBoltzmann::KEigenvalueROMSolver MIPOD execution completed\n\n";
-
   }
 
   if (rom_options.phase == Phase::ONLINE)
