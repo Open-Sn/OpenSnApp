@@ -13,6 +13,7 @@ enum class Phase
   OFFLINE,
   MERGE,
   SYSTEMS,
+  MIPOD,
   ONLINE
 };
 
@@ -22,6 +23,7 @@ struct ROMOptions
   Phase phase = Phase::OFFLINE;
   std::string param_file = "";
   std::unique_ptr<CAROM::Vector> new_point;
+  bool take_sample = true;
 
   ROMOptions() = default;
 };

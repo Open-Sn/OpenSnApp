@@ -1,19 +1,52 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
+import os
+
+
+def _collect_new_point():
+    """Collect p0, p1, ... command-line parameters into a Python list.
+
+    The online ROM may be interpolated either in the original parameter space
+    or in a reduced active-coordinate space. Therefore the number of p-values
+    is intentionally not hard-coded.
+    """
+    values = []
+    i = 0
+    while True:
+        name = "p{}".format(i)
+        if name not in globals():
+            break
+        values.append(float(globals()[name]))
+        i += 1
+
+    if not values:
+        raise RuntimeError(
+            "phase='online' requires at least one active/interpolation coordinate "
+            "to be passed as p0, p1, ..."
+        )
+
+    return values
+
+
+def _parameter_file(new_point):
+    """Select physical or active training coordinates for interpolation."""
+    active_file = "data/params_AS.txt"
+    if os.path.exists(active_file):
+        active_points = np.atleast_2d(np.loadtxt(active_file))
+        if active_points.shape[1] == len(new_point):
+            return active_file
+    return "data/params.txt"
+
 
 if __name__ == "__main__":
 
-    try:
-        print("Parameter id = {}".format(pid))
-    except:
-        p_id=0
-        print("Parameter id = {}".format(pid))
+    print("Parameter id = {}".format(pid))
 
     print("{} phase".format(phase))
 
     widths = [4.6, 1.126152]
-    nrefs = [50, 50]
+    nrefs = [8, 4] if globals().get("test_mode", False) else [500, 500]
     Nmat = len(widths)
     nodes = [0.]
     for imat in range(Nmat):
@@ -36,11 +69,11 @@ if __name__ == "__main__":
     fissile.LoadFromOpenSn("data/URRb.xs")
 
     # Angle information
-    n_angles = 32  # Number of discrete angles
+    n_angles = 8 if globals().get("test_mode", False) else 128
     scat_order = 0  # Scattering order
 
     pquad = GLProductQuadrature1DSlab(n_polar=n_angles,
-                    scattering_order=scat_order)
+                                      scattering_order=scat_order)
 
     # Create and configure the discrete ordinates solver
     phys = DiscreteOrdinatesProblem(
@@ -71,36 +104,45 @@ if __name__ == "__main__":
     )
 
     if phase == "online":
-        new_point = [p0, p1, p2, p3, p4, p5, p6, p7]
+        new_point = _collect_new_point()
         print(new_point)
         rom_options = {
-                "param_id": pid,
-                "phase": phase,
-                "param_file": "data/params.txt",
-                "new_point": new_point
-            }
+            "param_id": pid,
+            "phase": phase,
+            "param_file": _parameter_file(new_point),
+            "new_point": new_point
+        }
     else:
         rom_options = {
-                "param_id": pid,
-                "phase": phase
-            }
+            "param_id": pid,
+            "phase": phase
+        }
 
-    rom = ROMProblem(problem=phys,options=rom_options)
+    rom = ROMProblem(problem=phys, options=rom_options)
 
     # Initialize and execute solver
-    k_solver = PowerIterationROMSolver(problem=phys, rom_problem=rom, k_tol=1.0e-7)
+    if globals().get("use_nlke", False):
+        k_solver = NLKEigenROMSolver(
+            problem=phys,
+            rom_problem=rom,
+            nl_max_its=20,
+            l_max_its=50,
+            l_abs_tol=1.0e-10,
+            l_rel_tol=1.0e-10,
+        )
+    else:
+        k_solver = PowerIterationROMSolver(problem=phys, rom_problem=rom, k_tol=1.0e-7)
     k_solver.Initialize()
     k_solver.Execute()
 
-    try:
-        if phase == "online" and saveh5:
-            phys.WriteFluxMoments("output/rom_{}_".format(pid))
-            np.savetxt("output/rom_k_{}.txt".format(pid), [k_solver.GetEigenvalue()])
-        if phase == "offline" and saveh5:
-            phys.WriteFluxMoments("output/fom_{}_".format(pid))
-            np.savetxt("output/fom_k_{}.txt".format(pid), [k_solver.GetEigenvalue()])
-    except:
-        if phase == "online":
-            phys.WriteFluxMoments("output/rom")
-        if phase == "offline":
-            phys.WriteFluxMoments("output/fom")
+    if phase == "online" and saveh5:
+        phys.WriteFluxMoments("output/rom_{}_".format(pid))
+        np.savetxt("output/rom_k_{}.txt".format(pid), [k_solver.GetEigenvalue()])
+    if phase == "mipod" and saveh5:
+        phys.WriteFluxMoments("output/mipod_{}_".format(pid))
+        np.savetxt("output/mipod_k_{}.txt".format(pid), [k_solver.GetEigenvalue()])
+    if phase == "offline" and saveh5:
+        phys.WriteFluxMoments("output/fom_{}_".format(pid))
+        np.savetxt("output/test_fom_k_{}.txt".format(pid), [k_solver.GetEigenvalue()])
+    elif phase == "offline":
+        np.savetxt("output/fom_k_{}.txt".format(pid), [k_solver.GetEigenvalue()])
