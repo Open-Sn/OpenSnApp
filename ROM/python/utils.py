@@ -1,5 +1,4 @@
 import numpy as np
-import subprocess
 import h5py
 from scipy.stats import qmc
 
@@ -35,6 +34,7 @@ def load_2d_flux(file_pattern, ranks, moment=0):
 
     return xs, ys, vals, num_groups
 
+
 def load_1d_flux(file_pattern, ranks, moment=0):
     """Load concatenated 1-D (x, flux) data per energy group."""
     with h5py.File(file_pattern.format(ranks[0]), "r") as f0:
@@ -64,51 +64,39 @@ def load_1d_flux(file_pattern, ranks, moment=0):
     return xs, vals, num_groups
 
 
-def sample_parameter_space(bounds, n_samples):
-    """Performs uniform sampling on a set of bounds and includes the vertices of the parameter domain"""
-    n_dim = len(bounds)
-    n_vertices = 2**n_dim
-    n_random = n_samples - n_vertices
-
-    # Random interior samples
-    random_samples = np.array([
-        [np.random.uniform(low, high) for (low, high) in bounds]
-        for _ in range(n_random)
+def sample_parameter_space(bounds, n_samples, rng=None):
+    """Generate independent uniform samples within a parameter domain."""
+    if rng is None:
+        rng = np.random.default_rng()
+    return np.array([
+        [rng.uniform(low, high) for (low, high) in bounds]
+        for _ in range(n_samples)
     ])
 
-    # Vertices of domain
-    vertices = np.zeros((n_vertices, n_dim))
-    for i in range(n_vertices):
-        for d, (low, high) in enumerate(bounds):
-            if (i >> d) & 1:
-                vertices[i, d] = high
-            else:
-                vertices[i, d] = low
 
-    samples = np.vstack([random_samples, vertices])
-    return samples
-
-def sample_LHS(bounds, n_samples):
+def sample_LHS(bounds, n_samples, seed=None):
     """Performs Latin Hypercube Sampling on a set of bounds"""
     d = len(bounds)
 
     # Create LHS sampler
-    sampler = qmc.LatinHypercube(d=d)
+    sampler = qmc.LatinHypercube(d=d, seed=seed)
 
     # Generate samples in [0, 1]^d
     unit_samples = sampler.random(n=n_samples)
 
     # Scale to physical bounds
-    lows  = np.array([low for (low, high) in bounds])
+    lows = np.array([low for (low, high) in bounds])
     highs = np.array([high for (low, high) in bounds])
 
     samples = qmc.scale(unit_samples, lows, highs)
     return samples
 
-def sample_test(bounds, n_samples):
+def sample_test(bounds, n_samples, rng=None):
     """Performs uniform sampling on a set of bounds to generate a test set"""
+    if rng is None:
+        rng = np.random.default_rng()
     samples = np.array([
-        [np.random.uniform(low, high) for (low, high) in bounds]
+        [rng.uniform(low, high) for (low, high) in bounds]
         for _ in range(n_samples)
     ])
 
