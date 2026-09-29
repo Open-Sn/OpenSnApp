@@ -43,15 +43,15 @@ public:
 
   const std::vector<std::shared_ptr<FieldFunctionGridBased>>& GetFieldFunctions() const;
 
-  inline void SetDCoefFunction(const ScalarSpatialMaterialFunction& function)
+  void SetDCoefFunction(const ScalarSpatialMaterialFunction& function)
   {
     d_coef_function_ = function;
   }
-  inline void SetQExtFunction(const ScalarSpatialMaterialFunction& function)
+  void SetQExtFunction(const ScalarSpatialMaterialFunction& function)
   {
     q_ext_function_ = function;
   }
-  inline void SetSigmaAFunction(const ScalarSpatialMaterialFunction& function)
+  void SetSigmaAFunction(const ScalarSpatialMaterialFunction& function)
   {
     sigma_a_function_ = function;
   }

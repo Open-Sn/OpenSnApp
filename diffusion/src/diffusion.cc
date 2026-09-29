@@ -137,9 +137,13 @@ WrapDiffusion(py::module& diffusion)
     mesh: pyopensn.mesh.MeshContinuum
         Input mesh.
     residual_tolerance: float, default=1.0e-2
-        Solver relative tolerance.
+        Absolute tolerance on the 2-norm of the preconditioned residual of the
+        linear solve (CG with GAMG). This is not a relative tolerance: the
+        solve stops once the residual norm falls below this value, regardless
+        of the size of the right-hand side. Note that the per-iteration residual
+        printed to the log is normalized by the right-hand-side norm.
     max_iters: int, default=500
-        Solver relative tolerance.
+        Maximum number of Krylov iterations.
     )"
   );
 
@@ -171,9 +175,13 @@ WrapDiffusion(py::module& diffusion)
     mesh: pyopensn.mesh.MeshContinuum
         Input mesh.
     residual_tolerance: float, default=1.0e-2
-        Solver relative tolerance.
+        Absolute tolerance on the 2-norm of the preconditioned residual of the
+        linear solve (CG with GAMG). This is not a relative tolerance: the
+        solve stops once the residual norm falls below this value, regardless
+        of the size of the right-hand side. Note that the per-iteration residual
+        printed to the log is normalized by the right-hand-side norm.
     max_iters: int, default=500
-        Solver relative tolerance.
+        Maximum number of Krylov iterations.
     )"
   );
   // clang-format on

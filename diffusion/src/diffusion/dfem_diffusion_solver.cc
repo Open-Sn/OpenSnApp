@@ -241,8 +241,9 @@ DFEMDiffusionSolver::Execute()
 
   log.Log() << "Assembling system: ";
 
-  for (const auto& cell : grid.local_cells)
+  for (const auto& cell_ptr : grid.GetLocalCells())
   {
+    const auto& cell = *cell_ptr;
     const auto& cell_mapping = sdm.GetCellMapping(cell);
     const size_t num_nodes = cell_mapping.GetNumNodes();
     const auto cc_nodes = cell_mapping.GetNodeLocations();
@@ -291,7 +292,7 @@ DFEMDiffusionSolver::Execute()
       // interior face
       if (face.has_neighbor)
       {
-        const auto& adj_cell = grid.cells[face.neighbor_id];
+        const auto& adj_cell = grid.GetGlobalCell(face.neighbor_id);
         const auto& adj_cell_mapping = sdm.GetCellMapping(adj_cell);
         const auto ac_nodes = adj_cell_mapping.GetNodeLocations();
         const size_t acf = MeshContinuum::MapCellFace(cell, adj_cell, f);
@@ -512,9 +513,6 @@ DFEMDiffusionSolver::Execute()
             } // for fj
           } // for i
         } // Dirichlet BC
-        else
-        {
-        } // else BC
       } // boundary face
     } // for face f
   } // for cell

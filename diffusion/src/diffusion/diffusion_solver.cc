@@ -25,8 +25,11 @@ DiffusionSolverBase::GetInputParameters()
 {
   InputParameters params = Solver::GetInputParameters();
   params.AddRequiredParameter<std::shared_ptr<MeshContinuum>>("mesh", "Mesh");
-  params.AddOptionalParameter<double>("residual_tolerance", 1.0e-2, "Solver relative tolerance");
-  params.AddOptionalParameter<int>("max_iters", 500, "Solver relative tolerance");
+  params.AddOptionalParameter<double>(
+    "residual_tolerance",
+    1.0e-2,
+    "Absolute tolerance on the 2-norm of the preconditioned residual of the linear solve.");
+  params.AddOptionalParameter<int>("max_iters", 500, "Maximum number of Krylov iterations.");
   return params;
 }
 
