@@ -4,11 +4,13 @@
 #include "diff_py_app.h"
 #include "mpicpp-lite/mpicpp-lite.h"
 #include "petsc.h"
+#include <cstdlib>
+#include <iostream>
 
 int
 main(int argc, char** argv)
 {
-  mpi::Environment env(argc, argv);
+  mpi::Environment env(argc, argv, mpi::ThreadSupport::MULTIPLE);
 
   PetscCall(PetscInitializeNoArguments()); // NOLINT(bugprone-casting-through-void)
 
@@ -21,7 +23,7 @@ main(int argc, char** argv)
   }
   catch (...)
   {
-    std::fprintf(stderr, "Unknown fatal error\n");
+    std::cerr << "Unknown fatal error\n";
     retval = EXIT_FAILURE;
   }
 

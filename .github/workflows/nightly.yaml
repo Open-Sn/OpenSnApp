@@ -64,4 +64,6 @@ jobs:
           module load opensn/gcc/14 python3/3.12.3
           cd diffusion
           export PYTHONPATH=$PWD/python
-          test/run_tests -d test/diffusion
+          test/run_tests \
+            --exe "$PWD/build/diff_app_exec" \
+            --directory "$PWD/test/diffusion"

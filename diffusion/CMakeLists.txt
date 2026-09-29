@@ -26,11 +26,13 @@ find_package(OpenSn REQUIRED)
 
 message(STATUS "Found OpenSn ${OpenSn_VERSION} (from: ${OpenSn_DIR})")
 
-find_package(pybind11 REQUIRED)
+# Find Python first and have pybind11 reuse it, so the app embeds the same
+# interpreter that OpenSn was built against.
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
+set(PYBIND11_FINDPYTHON ON)
+find_package(pybind11 CONFIG REQUIRED)
 
 find_package(caliper REQUIRED)
-
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 file(GLOB_RECURSE DIFFUSION_SRCS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/diffusion/*.cc)
 
@@ -42,11 +44,7 @@ add_executable(
   ${DIFFUSION_SRCS}
 )
 
-target_include_directories(diff_app_exec PRIVATE
-  ${PROJECT_SOURCE_DIR}/src
-  ${OpenSn_INSTALL_PREFIX}/include
-  ${PROJECT_SOURCE_DIR}/blah/opensn/external
-)
+target_include_directories(diff_app_exec PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 target_link_libraries(diff_app_exec PRIVATE
   opensn::opensn

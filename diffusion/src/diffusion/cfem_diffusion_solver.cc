@@ -235,8 +235,9 @@ CFEMDiffusionSolver::Execute()
 
   // Assemble the system
   log.Log() << "Assembling system: ";
-  for (const auto& cell : grid.local_cells)
+  for (const auto& cell_ptr : grid.GetLocalCells())
   {
+    const auto& cell = *cell_ptr;
     const auto& cell_mapping = sdm.GetCellMapping(cell);
     const auto fe_vol_data = cell_mapping.MakeVolumetricFiniteElementData();
 

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "diffusion_solver.h"
-#include "opensn/framework/mesh/mesh.h"
 #include "opensn/modules/solver.h"
 #include "opensn/framework/math/petsc_utils/petsc_utils.h"
 #include "opensn/framework/utils/timer.h"

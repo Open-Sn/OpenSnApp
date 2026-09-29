@@ -10,10 +10,9 @@ using namespace opensn;
 namespace diffpy
 {
 
-DiffApp::DiffApp(const mpi::Communicator& comm)
-  : opensnpy::PyApp(comm)
+DiffApp::DiffApp(const mpi::Communicator& comm) : opensnpy::PyApp(comm)
 {
-  opensnpy::console.BindModule(WrapDiffusion);
+  opensnpy::Console::BindModule(WrapDiffusion);
 }
 
 } // namespace diffpy
