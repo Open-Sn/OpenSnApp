@@ -1,0 +1,76 @@
+name: Nightly Tests (latest libROM)
+
+# Builds the ROM application against the head of libROM's default branch, so upstream libROM
+# changes are caught before they reach the installed libROM used by nightly.yaml. Not run on pull
+# requests: a libROM regression should not block changes to this repository.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-rom-tests-latest-librom:
+    runs-on: [self-hosted]
+    steps:
+      - name: checkout this repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: checkout opensn
+        uses: actions/checkout@v4
+        with:
+          repository: Open-Sn/opensn
+          path: opensn
+      - name: checkout librom
+        uses: actions/checkout@v4
+        with:
+          repository: LLNL/libROM
+          path: librom
+      - name: record versions
+        shell: bash
+        run: |
+          {
+            echo "opensn: $(git -C opensn rev-parse HEAD)"
+            echo "libROM: $(git -C librom rev-parse HEAD)"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: clean build directories
+        shell: bash
+        run: |
+          rm -rf opensn/build opensn/install librom/build librom/install ROM/build
+      - name: install opensn
+        shell: bash
+        run: |
+          module load opensn/gcc/14 python3/3.12.3
+          cd opensn && mkdir build && mkdir install && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=../install .. && make -j && make install
+      - name: install librom
+        shell: bash
+        run: |
+          module load opensn/gcc/14 OpenBLAS/0.3.31 scalapack/2.2.2
+          cmake -S librom -B librom/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$PWD/librom/install" \
+            -DENABLE_EXAMPLES=OFF \
+            -DBLAS_LIBRARIES="$BLAS_DIR/lib64/libopenblas.a" \
+            -DLAPACK_LIBRARIES="$BLAS_DIR/lib64/libopenblas.a" \
+            -DScaLAPACK_LIBRARY="$SCALAPACK_DIR/lib/libscalapack.a"
+          cmake --build librom/build -j
+          cmake --install librom/build
+      - name: compile rom
+        shell: bash
+        run: |
+          module load opensn/gcc/14 python3/3.12.3
+          export OpenSn_DIR=$PWD/opensn/install
+          export LIBROM_DIR=$PWD/librom/install
+          cd ROM
+          mkdir build && cd build && cmake .. && make -j
+      - name: test rom
+        shell: bash
+        run: |
+          module load opensn/gcc/14 python3/3.12.3
+          ROM/test/run_tests \
+            --exe "$PWD/ROM/build/rom_app_exec" \
+            --directory "$PWD/ROM/test/rom" \
+            --weights 7 \
+            --jobs 1
