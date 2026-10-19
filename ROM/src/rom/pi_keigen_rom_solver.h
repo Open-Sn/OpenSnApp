@@ -22,14 +22,15 @@ public:
   /** Constructs a power-iteration k-eigenvalue ROM solver. */
   explicit PowerIterationKEigenROMSolver(const InputParameters& params);
 
-  /** Initializes the underlying power-iteration solver. */
-  void Initialize() override;
-
-  /** Executes the selected offline, merge, systems, MI-POD, or online ROM phase. */
-  void Execute() override;
-
   /** Returns the input-parameter schema for PowerIterationKEigenROMSolver. */
   static InputParameters GetInputParameters();
+
+protected:
+  /** Initializes the underlying power-iteration solver. */
+  void InitializeSolver() override;
+
+  /** Executes the selected offline, merge, systems, MI-POD, or online ROM phase. */
+  void ExecuteSolver() override;
 };
 
 } // namespace opensn

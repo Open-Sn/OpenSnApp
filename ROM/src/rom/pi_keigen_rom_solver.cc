@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "modules/linear_boltzmann_solvers/lbs_problem/compute/lbs_compute.h"
+#include "modules/linear_boltzmann_solvers/discrete_ordinates_problem/iterative_methods/wgs_context.h"
 #include "framework/runtime.h"
 #include "pi_keigen_rom_solver.h"
 #include <chrono>
@@ -32,14 +33,24 @@ PowerIterationKEigenROMSolver::PowerIterationKEigenROMSolver(const InputParamete
 }
 
 void
-PowerIterationKEigenROMSolver::Initialize()
+PowerIterationKEigenROMSolver::InitializeSolver()
 {
-  PowerIterationKEigenSolver::Initialize();
+  PowerIterationKEigenSolver::InitializeSolver();
 }
 
 void
-PowerIterationKEigenROMSolver::Execute()
+PowerIterationKEigenROMSolver::ExecuteSolver()
 {
+  // The reduced operators use the power-iteration splitting: fission is the eigenvalue source and
+  // is excluded from the WGS operator that AssembleAU() inverts. Restored on return.
+  const auto scopes =
+    WGSContext::OverrideSourceScopes(*lbs_problem_,
+                                     [](SourceFlags& lhs_scope, SourceFlags& rhs_scope)
+                                     {
+                                       lhs_scope.Unset(APPLY_WGS_FISSION_SOURCES);
+                                       rhs_scope.Unset(APPLY_AGS_FISSION_SOURCES);
+                                     });
+
   auto& rom_options = rom_problem_->GetOptions();
   auto& options = lbs_problem_->GetOptions();
 
@@ -48,7 +59,7 @@ PowerIterationKEigenROMSolver::Execute()
     // Run full-order k-eigen solve and time it
     auto start = std::chrono::high_resolution_clock::now();
 
-    PowerIterationKEigenSolver::Execute();
+    PowerIterationKEigenSolver::ExecuteSolver();
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed = end - start;

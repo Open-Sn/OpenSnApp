@@ -111,17 +111,12 @@ DFEMDiffusionSolver::SetBoundaryOptions(const InputParameters& params)
 }
 
 void
-DFEMDiffusionSolver::Initialize()
+DFEMDiffusionSolver::InitializeSolver()
 {
   const std::string fname = "DFEMSolver::Initialize";
   log.Log() << "\n"
             << program_timer.GetTimeString() << " " << GetName()
             << ": Initializing DFEM Diffusion solver ";
-
-  // Get grid
-  if (grid_ptr_ == nullptr)
-    throw std::logic_error(std::string(__PRETTY_FUNCTION__) + " No grid defined.");
-  ValidateMaterialFunctions();
 
   log.Log() << "Global num cells: " << grid_ptr_->GetGlobalNumberOfCells();
 
@@ -228,7 +223,7 @@ DFEMDiffusionSolver::Initialize()
 }
 
 void
-DFEMDiffusionSolver::Execute()
+DFEMDiffusionSolver::ExecuteSolver()
 {
   log.Log() << "\nExecuting DFEM IP Diffusion solver";
 

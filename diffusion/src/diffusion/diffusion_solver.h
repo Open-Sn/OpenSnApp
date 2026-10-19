@@ -60,6 +60,9 @@ public:
   virtual void SetBoundaryOptions(const InputParameters& params) = 0;
 
 protected:
+  /// Checks that the grid and the material functions are set.
+  void ValidateState() const override;
+
   void InitFieldFunctions();
   void ValidateMaterialFunctions() const;
 

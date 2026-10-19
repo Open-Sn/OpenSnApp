@@ -213,7 +213,7 @@ ROMProblem::AssembleAU()
   assert(lbs_problem_->GetNumWGSSolvers() == 1);
   auto raw_context = lbs_problem_->GetWGSSolver(0)->GetContext();
   auto gs_context = std::dynamic_pointer_cast<WGSContext>(raw_context);
-  const auto scope = gs_context->lhs_src_scope;
+  const auto scope = gs_context->GetLHSSourceScope();
 
   auto& phi_old_local = lbs_problem_->GetPhiOldLocal();
   auto& q_moments_local = lbs_problem_->GetQMomentsLocal();
@@ -262,7 +262,7 @@ ROMProblem::AssembleRHS()
   assert(lbs_problem_->GetNumWGSSolvers() == 1);
   auto raw_context = lbs_problem_->GetWGSSolver(0)->GetContext();
   auto gs_context_ptr = std::dynamic_pointer_cast<WGSContext>(raw_context);
-  auto scope = gs_context_ptr->rhs_src_scope;
+  auto scope = gs_context_ptr->GetRHSSourceScope();
 
   auto& phi_old_local = lbs_problem_->GetPhiOldLocal();
   auto& q_moments_local = lbs_problem_->GetQMomentsLocal();

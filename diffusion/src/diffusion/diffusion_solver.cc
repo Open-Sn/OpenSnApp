@@ -125,6 +125,14 @@ DiffusionSolverBase::InitFieldFunctions()
 }
 
 void
+DiffusionSolverBase::ValidateState() const
+{
+  if (grid_ptr_ == nullptr)
+    throw std::logic_error(GetName() + ": No grid defined.");
+  ValidateMaterialFunctions();
+}
+
+void
 DiffusionSolverBase::ValidateMaterialFunctions() const
 {
   if (!d_coef_function_)

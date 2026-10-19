@@ -32,12 +32,12 @@ SteadyStateROMSolver::SteadyStateROMSolver(const InputParameters& params)
 }
 
 void
-SteadyStateROMSolver::Initialize()
+SteadyStateROMSolver::InitializeSolver()
 {
 }
 
 void
-SteadyStateROMSolver::Execute()
+SteadyStateROMSolver::ExecuteSolver()
 {
   auto& options = lbs_problem_->GetOptions();
   auto& rom_options = rom_problem_->GetOptions();
