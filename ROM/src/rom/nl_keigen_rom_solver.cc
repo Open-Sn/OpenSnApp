@@ -35,17 +35,21 @@ NLKEigenROMSolver::NLKEigenROMSolver(const InputParameters& params)
 }
 
 void
-NLKEigenROMSolver::Initialize()
+NLKEigenROMSolver::ValidateState() const
 {
-  nl_solver_.Initialize();
-  initialized_ = true;
+  OpenSnInvalidArgumentIf(not lbs_problem_, GetName() + ": problem is not set.");
+  OpenSnInvalidArgumentIf(not rom_problem_, GetName() + ": rom_problem is not set.");
 }
 
 void
-NLKEigenROMSolver::Execute()
+NLKEigenROMSolver::InitializeSolver()
 {
-  OpenSnLogicalErrorIf(not initialized_, GetName() + ": Initialize must be called before Execute.");
+  nl_solver_.Initialize();
+}
 
+void
+NLKEigenROMSolver::ExecuteSolver()
+{
   auto& rom_options = rom_problem_->GetOptions();
 
   if (rom_options.phase == Phase::OFFLINE)

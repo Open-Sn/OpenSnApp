@@ -110,17 +110,12 @@ CFEMDiffusionSolver::SetBoundaryOptions(const InputParameters& params)
 }
 
 void
-CFEMDiffusionSolver::Initialize()
+CFEMDiffusionSolver::InitializeSolver()
 {
   const std::string fname = "CFEMSolver::Initialize";
   log.Log() << "\n"
             << program_timer.GetTimeString() << " " << GetName()
             << ": Initializing CFEM Diffusion solver ";
-
-  // Get grid
-  if (grid_ptr_ == nullptr)
-    throw std::logic_error(std::string(__PRETTY_FUNCTION__) + " No grid defined.");
-  ValidateMaterialFunctions();
 
   log.Log() << "Global num cells: " << grid_ptr_->GetGlobalNumberOfCells();
 
@@ -226,7 +221,7 @@ CFEMDiffusionSolver::Initialize()
 }
 
 void
-CFEMDiffusionSolver::Execute()
+CFEMDiffusionSolver::ExecuteSolver()
 {
   log.Log() << "\nExecuting CFEM Diffusion solver";
 

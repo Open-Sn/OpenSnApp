@@ -20,11 +20,12 @@ public:
   /** Constructs a steady-state source ROM solver. */
   explicit SteadyStateROMSolver(const InputParameters& params);
 
+protected:
   /** Initializes the steady-state ROM solver. */
-  void Initialize();
+  void InitializeSolver() override;
 
   /** Executes the selected offline, merge, systems, MI-POD, or online ROM phase. */
-  void Execute();
+  void ExecuteSolver() override;
 
 public:
   /** Returns the input-parameter schema for SteadyStateROMSolver. */

@@ -24,8 +24,9 @@ public:
 
   void SetBoundaryOptions(const InputParameters& params) override;
 
-  void Initialize() override;
-  void Execute() override;
+protected:
+  void InitializeSolver() override;
+  void ExecuteSolver() override;
 
 private:
   /**
