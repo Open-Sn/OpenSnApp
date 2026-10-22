@@ -7,7 +7,7 @@
 #include "opensn/framework/logging/log.h"
 #include "opensn/framework/utils/timer.h"
 #include "opensn/framework/utils/utils.h"
-#include "opensn/framework/mesh/mesh_continuum/mesh_continuum.h"
+#include "opensn/framework/mesh/mesh/mesh.h"
 #include "opensn/framework/field_functions/field_function_grid_based.h"
 #include "opensn/framework/math/spatial_discretization/finite_element/piecewise_linear/piecewise_linear_discontinuous.h"
 #include "opensn/framework/math/functions/function.h"
@@ -21,8 +21,7 @@ DFEMDiffusionSolver::Create(const ParameterBlock& params)
   return CreateObject<DFEMDiffusionSolver>("diffusion::DFEMDiffusionSolver", params);
 }
 
-DFEMDiffusionSolver::DFEMDiffusionSolver(const std::string& name,
-                                         std::shared_ptr<MeshContinuum> grid_ptr)
+DFEMDiffusionSolver::DFEMDiffusionSolver(const std::string& name, std::shared_ptr<Mesh> grid_ptr)
   : DiffusionSolverBase(name, grid_ptr)
 {
 }
@@ -290,7 +289,7 @@ DFEMDiffusionSolver::ExecuteSolver()
         const auto& adj_cell = grid.GetGlobalCell(face.neighbor_id);
         const auto& adj_cell_mapping = sdm.GetCellMapping(adj_cell);
         const auto ac_nodes = adj_cell_mapping.GetNodeLocations();
-        const size_t acf = MeshContinuum::MapCellFace(cell, adj_cell, f);
+        const size_t acf = Mesh::MapCellFace(cell, adj_cell, f);
         const double hp_neigh = HPerpendicular(adj_cell, acf);
 
         const auto imat_neigh = adj_cell.block_id;

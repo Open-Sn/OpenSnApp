@@ -10,7 +10,7 @@
 
 namespace opensn
 {
-class MeshContinuum;
+class Mesh;
 class SpatialDiscretization;
 class Cell;
 
@@ -18,7 +18,7 @@ class Cell;
 class DFEMDiffusionSolver : public DiffusionSolverBase
 {
 public:
-  explicit DFEMDiffusionSolver(const std::string& name, std::shared_ptr<MeshContinuum> grid_ptr);
+  explicit DFEMDiffusionSolver(const std::string& name, std::shared_ptr<Mesh> grid_ptr);
   explicit DFEMDiffusionSolver(const InputParameters& params);
   ~DFEMDiffusionSolver() override;
 

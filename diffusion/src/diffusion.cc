@@ -134,7 +134,7 @@ WrapDiffusion(py::module& diffusion)
 
     Parameters
     ----------
-    mesh: pyopensn.mesh.MeshContinuum
+    mesh: pyopensn.mesh.Mesh
         Input mesh.
     residual_tolerance: float, default=1.0e-2
         Absolute tolerance on the 2-norm of the preconditioned residual of the
@@ -172,7 +172,7 @@ WrapDiffusion(py::module& diffusion)
 
     Parameters
     ----------
-    mesh: pyopensn.mesh.MeshContinuum
+    mesh: pyopensn.mesh.Mesh
         Input mesh.
     residual_tolerance: float, default=1.0e-2
         Absolute tolerance on the 2-norm of the preconditioned residual of the

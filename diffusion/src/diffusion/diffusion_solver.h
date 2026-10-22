@@ -12,7 +12,7 @@
 namespace opensn
 {
 
-class MeshContinuum;
+class Mesh;
 class SpatialDiscretization;
 
 /**
@@ -32,7 +32,7 @@ public:
     std::array<double, 3> values;
   };
 
-  explicit DiffusionSolverBase(const std::string& name, std::shared_ptr<MeshContinuum> grid_ptr);
+  explicit DiffusionSolverBase(const std::string& name, std::shared_ptr<Mesh> grid_ptr);
   explicit DiffusionSolverBase(const InputParameters& params);
   ~DiffusionSolverBase() override;
 
@@ -69,7 +69,7 @@ protected:
   using BoundaryInfo = std::pair<BoundaryType, std::vector<double>>;
   using BoundaryPreferences = std::map<std::string, BoundaryInfo>;
 
-  std::shared_ptr<MeshContinuum> grid_ptr_;
+  std::shared_ptr<Mesh> grid_ptr_;
   std::shared_ptr<SpatialDiscretization> sdm_ptr_;
   size_t num_local_dofs_;
   size_t num_global_dofs_;

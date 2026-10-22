@@ -8,14 +8,13 @@
 #include "opensn/framework/utils/timer.h"
 #include "opensn/framework/utils/utils.h"
 #include "opensn/framework/math/functions/function.h"
-#include "opensn/framework/mesh/mesh_continuum/mesh_continuum.h"
+#include "opensn/framework/mesh/mesh/mesh.h"
 #include "opensn/framework/math/spatial_discretization/finite_element/piecewise_linear/piecewise_linear_continuous.h"
 
 namespace opensn
 {
 
-CFEMDiffusionSolver::CFEMDiffusionSolver(const std::string& name,
-                                         std::shared_ptr<MeshContinuum> grid_ptr)
+CFEMDiffusionSolver::CFEMDiffusionSolver(const std::string& name, std::shared_ptr<Mesh> grid_ptr)
   : DiffusionSolverBase(name, grid_ptr)
 {
 }

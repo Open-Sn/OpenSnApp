@@ -27,16 +27,20 @@ You must have the following available:
 
 ## Build
 
-From the repository root:
+From the `ROM` directory, point CMake at the OpenSn installation prefix and
+the libROM installation:
 
 ```bash
-mkdir build
-cd build
-cmake .. \
-  -DOpenSn_DIR=<path-to-opensn-install> \
-  -DlibROM_DIR=<path-to-librom-install>
-make -j
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH=<path-to-opensn-install> \
+  -DLIBROM_DIR=<path-to-librom-install>
+cmake --build build -j
 ```
+
+Alternatively, set `OpenSn_DIR` directly to
+`<path-to-opensn-install>/lib/cmake/opensn`. OpenSn's package configuration
+locates its own MPI, PETSc, VTK, Caliper, Boost, Python, and pybind11
+dependencies.
 An example can be run from its respective folder with
 ```bash
 python run_rom_*.py --exe=path/to/app/exe
