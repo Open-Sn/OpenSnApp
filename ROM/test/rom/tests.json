@@ -48,25 +48,25 @@
       {
         "type": "KeyValuePair",
         "key": "ROM_P58_PI_OMMI_K_REL_ERROR=",
-        "goldvalue": 0.0011285396914592725,
+        "goldvalue": 0.012795770231995575,
         "abs_tol": 1.0e-2
       },
       {
         "type": "KeyValuePair",
         "key": "ROM_P58_PI_OMMI_FLUX_REL_ERROR=",
-        "goldvalue": 0.0009472968851897239,
+        "goldvalue": 0.0025694668365647175,
         "abs_tol": 1.0e-3
       },
       {
         "type": "KeyValuePair",
         "key": "ROM_P58_PI_MIPOD_K_REL_ERROR=",
-        "goldvalue": 6.305417948322462e-9,
+        "goldvalue": 9.597543522464067e-10,
         "abs_tol": 1.0e-8
       },
       {
         "type": "KeyValuePair",
         "key": "ROM_P58_PI_MIPOD_FLUX_REL_ERROR=",
-        "goldvalue": 8.925144396116109e-9,
+        "goldvalue": 1.2594016519310535e-9,
         "abs_tol": 1.0e-8
       }
     ]
@@ -79,8 +79,14 @@
     "checks": [
       {
         "type": "KeyValuePair",
+        "key": "ROM_P58_NLKE_MIPOD_K_REL_ERROR=",
+        "goldvalue": 1.3731083587507627e-10,
+        "abs_tol": 1.0e-8
+      },
+      {
+        "type": "KeyValuePair",
         "key": "ROM_P58_NLKE_MIPOD_FLUX_REL_ERROR=",
-        "goldvalue": 1.948089406266461e-9,
+        "goldvalue": 1.9566051026163268e-9,
         "abs_tol": 1.0e-8
       }
     ]

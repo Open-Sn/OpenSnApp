@@ -4,6 +4,9 @@ set -euo pipefail
 num_procs=$1
 shift
 
+# libROM links a threaded OpenBLAS that otherwise starts one thread per core in every rank.
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
+
 if [[ ${num_procs} -eq 1 ]]; then
   exec "$@"
 fi

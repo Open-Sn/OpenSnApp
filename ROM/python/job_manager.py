@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 
@@ -53,12 +54,17 @@ class JobManager:
             opensn_args=opensn_args,
         )
         print("OPENSN CMD:", cmd, flush=True)
+        # libROM links a threaded OpenBLAS that otherwise starts one thread per core in every MPI
+        # rank. A value set by the caller takes precedence.
+        env = dict(os.environ)
+        env.setdefault("OPENBLAS_NUM_THREADS", "1")
         if stream_output:
-            p = subprocess.run(cmd, cwd=workdir, check=check)
+            p = subprocess.run(cmd, cwd=workdir, check=check, env=env)
         else:
             p = subprocess.run(
                 cmd,
                 cwd=workdir,
+                env=env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,

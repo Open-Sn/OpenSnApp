@@ -162,28 +162,31 @@ if __name__ == "__main__":
             "adjoint_flux_moments": adj_phi_prefix,
             "block_ids": [1],
         }
+        # ApplyKEigenvalueScaling reads the forward and adjoint flux moments for
+        # the fission-source denominator, so the sigma_t sensitivities need them too.
         common_psi = {
             "forward_angular_fluxes": fwd_psi_prefix,
             "adjoint_angular_fluxes": adj_psi_prefix,
             "block_ids": [1],
+            "forward_flux_moments": fwd_phi_prefix,
+            "adjoint_flux_moments": adj_phi_prefix,
         }
 
-        gradient = np.zeros(8)
-
-        # Parameters 0-1 are sigma_f[g]. Changing sigma_f changes both the
-        # production operator and sigma_t, so its derivative contains both
-        # contributions. Parameters 2-3 are capture cross sections and affect
-        # only sigma_t.
-        for g in range(num_groups):
-            total_sensitivity = _keigen_scaled_sensitivity(
-                phys,
-                k_eff,
-                {
-                    "sensitivity_type": "sigma_t",
-                    "group": g,
-                    **common_psi,
-                },
+        # The parameters are the entrywise fission parameterization of xs.py,
+        # [sigma_f[g], sigma_c[g], S_0[from_group,to_group]], with nu held fixed
+        # and sigma_t = sigma_f + sigma_c + sum_to S_0[g,to]. Every parameter
+        # therefore also changes sigma_t of its (source) group, and sigma_f changes
+        # the production coefficient nu_sigma_f by nu per unit.
+        nu = np.asarray(fissile.nu_sigma_f) / np.asarray(fissile.sigma_f)
+        total_sensitivity = [
+            _keigen_scaled_sensitivity(
+                phys, k_eff, {"sensitivity_type": "sigma_t", "group": g, **common_psi}
             )
+            for g in range(num_groups)
+        ]
+
+        gradient = np.zeros(8)
+        for g in range(num_groups):
             production_sensitivity = _keigen_scaled_sensitivity(
                 phys,
                 k_eff,
@@ -193,23 +196,26 @@ if __name__ == "__main__":
                     **common_phi,
                 },
             )
-            gradient[g] = production_sensitivity + total_sensitivity
-            gradient[2 + g] = total_sensitivity
+            gradient[g] = nu[g] * production_sensitivity + total_sensitivity[g]
+            gradient[2 + g] = total_sensitivity[g]
 
         # Parameters 4-7: zeroth-moment transfer entries S[from_group,to_group]
-        # in the same order used by P58Problem.bounds and URRb_base.txt.
+        # in the same order used by P58Problem.bounds and URRb_base.xs.
         scatter_pairs = [(0, 0), (0, 1), (1, 0), (1, 1)]
         for j, (from_group, to_group) in enumerate(scatter_pairs):
-            gradient[4 + j] = _keigen_scaled_sensitivity(
-                phys,
-                k_eff,
-                {
-                    "sensitivity_type": "scatter",
-                    "moment": 0,
-                    "from_group": from_group,
-                    "to_group": to_group,
-                    **common_phi,
-                },
+            gradient[4 + j] = (
+                _keigen_scaled_sensitivity(
+                    phys,
+                    k_eff,
+                    {
+                        "sensitivity_type": "scatter",
+                        "moment": 0,
+                        "from_group": from_group,
+                        "to_group": to_group,
+                        **common_phi,
+                    },
+                )
+                + total_sensitivity[from_group]
             )
 
         if rank == 0:

@@ -3,6 +3,7 @@
 
 #include "nl_keigen_rom_solver.h"
 #include "modules/linear_boltzmann_solvers/lbs_problem/compute/lbs_compute.h"
+#include "modules/linear_boltzmann_solvers/discrete_ordinates_problem/iterative_methods/wgs_context.h"
 #include "framework/logging/log.h"
 #include "framework/runtime.h"
 #include "framework/utils/error.h"
@@ -79,8 +80,22 @@ NLKEigenROMSolver::ExecuteSolver()
     rom_problem_->MergePhase(rom_options.param_id);
   }
 
+  // The reduced operators use the power-iteration splitting: fission is the eigenvalue source and
+  // is excluded from the WGS operator that AssembleAU() inverts. The full-order NLKE solve above
+  // keeps fission in its operator, so only the phases that assemble the operators override it.
+  const auto power_iteration_scopes = [this]()
+  {
+    return WGSContext::OverrideSourceScopes(*lbs_problem_,
+                                            [](SourceFlags& lhs_scope, SourceFlags& rhs_scope)
+                                            {
+                                              lhs_scope.Unset(APPLY_WGS_FISSION_SOURCES);
+                                              rhs_scope.Unset(APPLY_AGS_FISSION_SOURCES);
+                                            });
+  };
+
   if (rom_options.phase == Phase::SYSTEMS)
   {
+    const auto scopes = power_iteration_scopes();
     std::shared_ptr<CAROM::Matrix> AU_ = rom_problem_->AssembleAU();
     rom_problem_->LoadUgs();
     std::shared_ptr<CAROM::Matrix> BU_ = rom_problem_->AssembleBU();
@@ -93,6 +108,7 @@ NLKEigenROMSolver::ExecuteSolver()
 
   if (rom_options.phase == Phase::MIPOD)
   {
+    const auto scopes = power_iteration_scopes();
     rom_problem_->LoadUgs();
 
     auto start = std::chrono::high_resolution_clock::now();

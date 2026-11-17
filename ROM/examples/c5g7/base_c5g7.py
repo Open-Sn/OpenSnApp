@@ -108,7 +108,6 @@ if __name__ == "__main__":
                 "angular_quadrature": pquad,
                 "inner_linear_method": "petsc_gmres",
                 "angle_aggregation_type": "polar",
-                "angle_aggregation_num_subsets": 1,
             },
         ],
         xs_map=xs_map,
