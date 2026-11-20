@@ -18,7 +18,7 @@ def main():
         executable = os.environ.get("ROM_APP_EXEC", str(rom_root / "build" / "rom_app_exec"))
         os.environ["ROM_APP_EXEC"] = os.path.abspath(executable)
         arguments.extend(["--exe", executable])
-    if "-d" not in arguments and "--directory" not in arguments and "-t" not in arguments:
+    if "-d" not in arguments and "--directory" not in arguments:
         arguments.extend(["--directory", str(Path(__file__).resolve().parent / "rom")])
     if "--mpi-cmd" not in arguments:
         launcher = Path(__file__).resolve().parent / "launch_test"

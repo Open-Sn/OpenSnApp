@@ -137,7 +137,6 @@ if __name__ == "__main__":
                 "angular_quadrature": pquad,
                 "inner_linear_method": "petsc_gmres",
                 "angle_aggregation_type": "polar",
-                "angle_aggregation_num_subsets": 1,
             },
         ],
         xs_map=xs_map,
@@ -217,40 +216,44 @@ if __name__ == "__main__":
                 "adjoint_flux_moments": adj_phi_prefix,
                 "block_ids": [block_id],
             }
+            # ApplyKEigenvalueScaling reads the forward and adjoint flux moments for
+            # the fission-source denominator, so the sigma_t sensitivities need them too.
             common_psi = {
                 "forward_angular_fluxes": fwd_psi_prefix,
                 "adjoint_angular_fluxes": adj_psi_prefix,
                 "block_ids": [block_id],
+                "forward_flux_moments": fwd_phi_prefix,
+                "adjoint_flux_moments": adj_phi_prefix,
             }
+
+            # The entrywise fission parameterization of xs.py holds nu fixed and
+            # sets sigma_t = sigma_f + sigma_c + sum_to S_0[g,to]. Every parameter
+            # therefore also changes sigma_t of its (source) group, and sigma_f
+            # changes the production coefficient nu_sigma_f by nu per unit.
+            material_xs = xss[block_id]
+            nu = np.asarray(material_xs.nu_sigma_f) / np.asarray(material_xs.sigma_f)
+            total_sensitivity = [
+                _keigen_scaled_sensitivity(
+                    phys, k_eff, {"sensitivity_type": "sigma_t", "group": g, **common_psi}
+                )
+                for g in range(num_groups)
+            ]
 
             # sigma_f[g]
             for g in range(num_groups):
-                gradient_entries.append(
-                    _keigen_scaled_sensitivity(
-                        phys,
-                        k_eff,
-                        {
-                            "sensitivity_type": "production",
-                            "group": g,
-                            **common_phi,
-                        },
-                    )
+                production_sensitivity = _keigen_scaled_sensitivity(
+                    phys,
+                    k_eff,
+                    {
+                        "sensitivity_type": "production",
+                        "group": g,
+                        **common_phi,
+                    },
                 )
+                gradient_entries.append(nu[g] * production_sensitivity + total_sensitivity[g])
 
-            # sigma_c[g]. In this XS parameterization, capture changes sigma_t
-            # without a compensating production or scattering term.
-            for g in range(num_groups):
-                gradient_entries.append(
-                    _keigen_scaled_sensitivity(
-                        phys,
-                        k_eff,
-                        {
-                            "sensitivity_type": "sigma_t",
-                            "group": g,
-                            **common_psi,
-                        },
-                    )
-                )
+            # sigma_c[g]
+            gradient_entries.extend(total_sensitivity)
 
             # S_0[g_from,g_to]
             for from_group, to_group in transfer_entries:
@@ -266,6 +269,7 @@ if __name__ == "__main__":
                             **common_phi,
                         },
                     )
+                    + total_sensitivity[from_group]
                 )
 
         gradient = np.asarray(gradient_entries, dtype=float)

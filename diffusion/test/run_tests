@@ -46,7 +46,7 @@ parser.add_argument(
 parser.add_argument(
     "-t", "--test",
     type=str, required=False, default=None,
-    help="Full path to an OpenSn test file"
+    help="A test file, either a path or a file name in --directory"
 )
 
 parser.add_argument(
@@ -93,11 +93,12 @@ parser.add_argument(
 
 argv = parser.parse_args()
 
-# --test should provide the full path to a test file. Break that up and set
-# test and directory appropriately
+# --test is a test file. A path also sets the search directory. A bare file name is
+# looked up in --directory.
 if argv.test is not None:
     dir, file = os.path.split(argv.test)
-    argv.directory = dir
+    if dir:
+        argv.directory = dir
     argv.test = file
 
 # Check the test directory exists
